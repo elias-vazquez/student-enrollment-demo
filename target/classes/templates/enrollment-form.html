@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Enrollment</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col">
+                <h1 class="display-5">
+                    <i class="bi bi-person-plus-fill text-success"></i>
+                    Create New Enrollment
+                </h1>
+                <p class="lead text-muted">Enroll a student in a course</p>
+            </div>
+        </div>
+
+        <!-- Form Card -->
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow">
+                    <div class="card-body p-4">
+                        <form action="/enrollments" method="post" id="enrollmentForm">
+                            
+                            <!-- Student Selection -->
+                            <div class="mb-4">
+                                <label for="studentId" class="form-label">
+                                    <i class="bi bi-person-circle text-primary"></i>
+                                    <strong>Select Student</strong>
+                                </label>
+                                <select class="form-select form-select-lg" 
+                                        id="studentId" 
+                                        name="studentId" 
+                                        required>
+                                    <option value="">-- Choose a student --</option>
+                                    <option th:each="student : ${students}" 
+                                            th:value="${student.id}"
+                                            th:text="${student.fullName + ' (' + student.studentId + ') - ' + student.email}">
+                                        John Doe (A12345678)
+                                    </option>
+                                </select>
+                                <div class="form-text">
+                                    Select the student you want to enroll
+                                </div>
+                            </div>
+
+                            <!-- Course Selection -->
+                            <div class="mb-4">
+                                <label for="courseId" class="form-label">
+                                    <i class="bi bi-book text-info"></i>
+                                    <strong>Select Course</strong>
+                                </label>
+                                <select class="form-select form-select-lg" 
+                                        id="courseId" 
+                                        name="courseId" 
+                                        required>
+                                    <option value="">-- Choose a course --</option>
+                                    <option th:each="course : ${courses}" 
+                                            th:value="${course.id}"
+                                            th:text="${course.courseCode + ' - ' + course.courseName + ' (' + course.credits + ' credits)'}">
+                                        SFWE405 - Software Architecture (3 credits)
+                                    </option>
+                                </select>
+                                <div class="form-text">
+                                    Select the course for enrollment
+                                </div>
+                            </div>
+
+                            <!-- Semester Input -->
+                            <div class="mb-4">
+                                <label for="semester" class="form-label">
+                                    <i class="bi bi-calendar-event text-warning"></i>
+                                    <strong>Semester</strong>
+                                </label>
+                                <input type="text" 
+                                       class="form-control form-control-lg" 
+                                       id="semester" 
+                                       name="semester" 
+                                       placeholder="e.g., Spring 2024"
+                                       required
+                                       pattern="(Spring|Summer|Fall|Winter) \d{4}"
+                                       title="Format: Spring 2024, Fall 2024, etc.">
+                                <div class="form-text">
+                                    Format: Spring 2024, Fall 2024, Summer 2024, or Winter 2024
+                                </div>
+                            </div>
+
+                            <!-- Buttons -->
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <a href="/enrollments" class="btn btn-secondary btn-lg">
+                                    <i class="bi bi-x-circle"></i> Cancel
+                                </a>
+                                <button type="submit" class="btn btn-success btn-lg">
+                                    <i class="bi bi-check-circle"></i> Create Enrollment
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Info Card -->
+                <div class="card mt-4 border-info">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="bi bi-info-circle-fill text-info"></i> 
+                            Enrollment Rules
+                        </h5>
+                        <ul class="mb-0">
+                            <li>A student cannot be enrolled in the same course twice for the same semester</li>
+                            <li>Enrollment date will be automatically set to today</li>
+                            <li>Status will be set to "Active" by default</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Back Link -->
+        <div class="text-center mt-4">
+            <a href="/enrollments" class="btn btn-link">
+                <i class="bi bi-arrow-left"></i> Back to Enrollment List
+            </a>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Simple form validation -->
+    <script>
+        // Add Bootstrap validation styles
+        (function() {
+            'use strict';
+            var forms = document.querySelectorAll('#enrollmentForm');
+            Array.prototype.slice.call(forms).forEach(function(form) {
+                form.addEventListener('submit', function(event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        })();
+    </script>
+</body>
+</html>
