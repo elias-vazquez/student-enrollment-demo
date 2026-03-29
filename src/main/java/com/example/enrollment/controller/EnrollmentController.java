@@ -14,13 +14,15 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 @RequestMapping("/enrollments")
 public class EnrollmentController {
-    
+
+    private static final String ERROR_MESSAGE_KEY = "errorMessage";
+
     private final EnrollmentService enrollmentService;
-    
+
     public EnrollmentController(EnrollmentService enrollmentService) {
         this.enrollmentService = enrollmentService;
     }
-    
+
     /**
      * Display enrollment list with pagination
      * URL: /enrollments or /enrollments?page=0&size=10
@@ -30,23 +32,19 @@ public class EnrollmentController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size,
             Model model) {
-        
-        // Create pageable with sorting by enrollment date (newest first)
+
         Pageable pageable = PageRequest.of(page, size, Sort.by("enrollmentDate").descending());
-        
-        // Get paginated enrollments
         Page<Enrollment> enrollmentPage = enrollmentService.getAllEnrollments(pageable);
-        
-        // Add attributes to model for the view
+
         model.addAttribute("enrollments", enrollmentPage.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", enrollmentPage.getTotalPages());
         model.addAttribute("totalItems", enrollmentPage.getTotalElements());
         model.addAttribute("pageSize", size);
-        
+
         return "enrollment-list";
     }
-    
+
     /**
      * Show the enrollment form
      * URL: /enrollments/new
@@ -57,7 +55,7 @@ public class EnrollmentController {
         model.addAttribute("courses", enrollmentService.getAllCourses());
         return "enrollment-form";
     }
-    
+
     /**
      * Handle form submission to create new enrollment
      * URL: POST /enrollments
@@ -68,23 +66,21 @@ public class EnrollmentController {
             @RequestParam Long courseId,
             @RequestParam String semester,
             RedirectAttributes redirectAttributes) {
-        
+
         try {
             Enrollment enrollment = enrollmentService.createEnrollment(studentId, courseId, semester);
-            redirectAttributes.addFlashAttribute("successMessage", 
-                "Enrollment created successfully! Student enrolled in " + 
+            redirectAttributes.addFlashAttribute("successMessage",
+                "Enrollment created successfully! Student enrolled in " +
                 enrollment.getCourse().getCourseCode());
         } catch (IllegalStateException e) {
-            // Business rule violation (already enrolled)
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            redirectAttributes.addFlashAttribute(ERROR_MESSAGE_KEY, e.getMessage());
         } catch (IllegalArgumentException e) {
-            // Validation error (student/course not found)
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            redirectAttributes.addFlashAttribute(ERROR_MESSAGE_KEY, e.getMessage());
         }
-        
+
         return "redirect:/enrollments";
     }
-    
+
     /**
      * Delete an enrollment
      * URL: POST /enrollments/{id}/delete
@@ -93,15 +89,15 @@ public class EnrollmentController {
     public String deleteEnrollment(
             @PathVariable Long id,
             RedirectAttributes redirectAttributes) {
-        
+
         try {
             enrollmentService.deleteEnrollment(id);
-            redirectAttributes.addFlashAttribute("successMessage", 
+            redirectAttributes.addFlashAttribute("successMessage",
                 "Enrollment deleted successfully!");
         } catch (IllegalArgumentException e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            redirectAttributes.addFlashAttribute(ERROR_MESSAGE_KEY, e.getMessage());
         }
-        
+
         return "redirect:/enrollments";
     }
 }
